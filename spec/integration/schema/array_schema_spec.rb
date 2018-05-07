@@ -56,4 +56,27 @@ RSpec.describe Dry::Validation::Schema, 'for an array' do
       )
     end
   end
+
+  context 'with input_processor = :sanitizer' do
+    subject(:schema) do
+      Dry::Validation.Schema do
+        configure do
+          config.input_processor = :sanitizer
+        end
+        each do
+          schema do
+            required(:prefix, :int).filled
+            required(:value, :int).filled
+          end
+        end
+      end
+    end
+
+    it 'sanitizes output keys' do
+      result = schema.([{ prefix: 1, value: 123, unknown_key: 'unwanted value' }])
+      expect(result.output).to eql(
+        [{ prefix: 1, value: 123 }]
+      )
+    end
+  end
 end
